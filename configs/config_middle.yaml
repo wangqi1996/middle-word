@@ -1,0 +1,67 @@
+data_configs:
+  lang_pair: "zh-en"
+  train_data:
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/train.zh"
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/train.en"
+  valid_data:
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/test/mt03.src"
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/test/mt03.ref0" # 对ref0文件进行bi-directions 为了loss_validation
+  bleu_valid_reference: "/home/user_data55/wangdq/data/nist_zh-en_1.34m/test/mt03.ref"
+  vocabularies:
+    - type: "bpe"
+      dict_path: "/home/public_data/nmtdata/nist_zh-en_1.34m/vocab.zh.bpe.json"
+      codes: "/home/public_data/nmtdata/nist_zh-en_1.34m/codes.30k.zh"
+      max_n_words: -1
+    - type: "bpe"
+      dict_path: "/home/public_data/nmtdata/nist_zh-en_1.34m/vocab.en.bpe.json"
+      max_n_words: -1
+      codes: "/home/public_data/nmtdata/nist_zh-en_1.34m/codes.30k.en"
+  max_len:
+    - 100
+    - 100
+  num_refs: 4
+  eval_at_char_level: false
+
+model_configs:
+  model: middle
+  d_word_vec: 512
+  d_model: 512
+  dropout: 0.1
+  proj_share_weight: true
+  bridge_type: "mlp"
+
+optimizer_configs:
+  optimizer: "adam"
+  learning_rate: 0.0005
+  grad_clip: 1.0  # 梯度裁剪
+  optimizer_params: ~
+  schedule_method: loss # 学习率衰减方法
+  scheduler_configs:
+    patience: 2  # 允许bad_count的次数
+    min_lr: 0.00005 # 当bad_count超过patience次时，缩放旧的lr，构造新的lr
+    scale: 0.5   # 线性减小的大小
+
+training_configs:
+  max_epochs: 50
+  shuffle: true # Whether to shuffle the whole data set after every epoch
+  use_bucket: true  # Whether using bucket. Bucket try to put sentences with similar lengths into a batch
+  batching_key: "tokens"  # The way to measure the size of a batch
+  batch_size: 2048
+  buffer_size: 2048
+  update_cycle: 3 # Update parameters every N batches.
+  valid_batch_size: 20 # Batch size when evaluationg loss on dev set. Always measured as "samples"
+  bleu_valid_batch_size: 5 # Batch size when evaluating BLEU on dev set. Always measures as "samples"
+  bleu_valid_warmup: 1 # Start to evaluate on dev set after N steps or epoch.
+  bleu_valid_cornfigs:
+    max_steps: 150
+    beam_size: 4
+    sacrebleu_args: "--tokenize none -lc"
+    postprocess: false # whether to do post-processing on translation, including detokenizing and re-casing
+    alpha: 0.0   # Length penalty value when decoding on dev set.
+  num_kept_checkpoints: 10 # Maximum numbers to keep checkpoints
+  num_kept_best_model: 1
+  disp_freq: 100 # Print information on tensorboard every N steps
+  save_freq: 1000 # Saving checkpoints every N steps
+  loss_valid_freq: 1000 # Evaluate loss on dev set every N steps
+  bleu_valid_freq: 1000 # Evaluate BLEU on dev set every N steps
+  early_stop_patience: 20 # Stop training if N subsequence BLEU evaluation on dev set does not increase
