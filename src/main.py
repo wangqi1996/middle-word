@@ -639,7 +639,7 @@ def train(FLAGS):
             # ================================================================================== #
             # BLEU Validation & Early Stop
 
-            if True or should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
+            if should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
                                        every_n_step=training_configs['bleu_valid_freq'],
                                        min_step=training_configs['bleu_valid_warmup'],
                                        debug=FLAGS.debug):

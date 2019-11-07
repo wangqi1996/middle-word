@@ -223,8 +223,9 @@ def bleu_validation(uidx,
 
     valid_iter = valid_iterator.build_generator(batch_size=batch_size)
 
+    # 计算第一个词的准确率
+    correct_first_words = 0
     for batch in valid_iter:
-
         seq_nums = batch[0]
         numbers += seq_nums
 
@@ -234,45 +235,50 @@ def bleu_validation(uidx,
         infer_progress_bar.update(len(seqs_x))
 
         x, y = prepare_data(seqs_x, seqs_y, cuda=GlobalNames.USE_GPU)
-        y_len = [len(y_) for y_ in seqs_y]
         with torch.no_grad():
-            word_ids = beam_search(nmt_model=model, beam_size=beam_size, max_steps=max_steps, src_seqs=x, alpha=alpha)
+            word_ids, first_words = beam_search(nmt_model=model, beam_size=beam_size, max_steps=max_steps, src_seqs=x,
+                                                alpha=alpha)
 
-        word_ids = word_ids.cpu().numpy().tolist()
+        # word_ids = word_ids.cpu().numpy().tolist()
 
-        # Append result
-        for sent_t in word_ids:
-            sent_t = [[wid for wid in line if wid != PAD] for line in sent_t]
-            x_tokens = []
+        correct_first_words += first_words.eq(y[:, 1]).sum()
+        #
+        # # Append result
+        # for sent_t in word_ids:
+        #     sent_t = [[wid for wid in line if wid != PAD] for line in sent_t]
+        #     x_tokens = []
+        #
+        #     for wid in sent_t[0]:
+        #         if wid == EOS:
+        #             break
+        #         x_tokens.append(vocab_tgt.id2token(wid))
+        #
+        #     if len(x_tokens) > 0:
+        #         trans.append(vocab_tgt.tokenizer.detokenize(x_tokens))
+        #     else:
+        #         trans.append('%s' % vocab_tgt.id2token(EOS))
 
-            for wid in sent_t[0]:
-                if wid == EOS:
-                    break
-                x_tokens.append(vocab_tgt.id2token(wid))
+    # origin_order = np.argsort(numbers).tolist()
+    # trans = [trans[ii] for ii in origin_order]
+    #
+    # infer_progress_bar.close()
+    #
+    # if not os.path.exists(valid_dir):
+    #     os.mkdir(valid_dir)
+    #
+    # hyp_path = os.path.join(valid_dir, 'trans.iter{0}.txt'.format(uidx))
+    #
+    # with open(hyp_path, 'w') as f:
+    #     for line in trans:
+    #         f.write('%s\n' % line)
+    #
+    # with open(hyp_path) as f:
+    #     bleu_v = bleu_scorer.corpus_bleu(f)
 
-            if len(x_tokens) > 0:
-                trans.append(vocab_tgt.tokenizer.detokenize(x_tokens))
-            else:
-                trans.append('%s' % vocab_tgt.id2token(EOS))
-
-    origin_order = np.argsort(numbers).tolist()
-    trans = [trans[ii] for ii in origin_order]
-
-    infer_progress_bar.close()
-
-    if not os.path.exists(valid_dir):
-        os.mkdir(valid_dir)
-
-    hyp_path = os.path.join(valid_dir, 'trans.iter{0}.txt'.format(uidx))
-
-    with open(hyp_path, 'w') as f:
-        for line in trans:
-            f.write('%s\n' % line)
-
-    with open(hyp_path) as f:
-        bleu_v = bleu_scorer.corpus_bleu(f)
-
-    return bleu_v
+    print('-----------------------------')
+    print(correct_first_words)
+    print(correct_first_words / 919.0)
+    # return bleu_v
 
 
 def load_pretrained_model(nmt_model, pretrain_path, device, exclude_prefix=None):
@@ -524,7 +530,7 @@ def train(FLAGS):
                                      )
 
         # 这个for循环结束算是以一个 epoch
-        for batch in training_iter:  #  batch_size
+        for batch in training_iter:  # batch_size
 
             uidx += 1  # 一个step是一个batch
 
@@ -636,7 +642,7 @@ def train(FLAGS):
             # ================================================================================== #
             # BLEU Validation & Early Stop
 
-            if should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
+            if True or should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
                                                every_n_step=training_configs['bleu_valid_freq'],
                                                min_step=training_configs['bleu_valid_warmup'],
                                                debug=FLAGS.debug):

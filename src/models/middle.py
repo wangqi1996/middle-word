@@ -8,7 +8,7 @@ from torch import nn
 import src.utils.init as my_init
 from src.data.vocabulary import PAD, BOS, EOS, UNK
 from src.decoding.utils import tile_batch, tensor_gather_helper
-from src.modules.attention import GeneralAttention
+from src.modules.attention import GeneralAttention, BahdanauAttention
 from src.modules.embeddings import Embeddings
 from src.modules.rnn import RNN
 
@@ -131,9 +131,13 @@ class Decoder(nn.Module):
                                      add_position_embedding=False)
 
         # 注意力层
-        self.enc_attn = GeneralAttention(query_size=hidden_size, value_size=context_size)
-        self.hid_attn = GeneralAttention(query_size=hidden_size, value_size=hidden_size)
-        self.emb_attn = GeneralAttention(query_size=hidden_size, value_size=input_size)
+        # self.enc_attn = GeneralAttention(query_size=hidden_size, value_size=context_size)
+        # self.hid_attn = GeneralAttention(query_size=hidden_size, value_size=hidden_size)
+        # self.emb_attn = GeneralAttention(query_size=hidden_size, value_size=input_size)
+
+        self.enc_attn = BahdanauAttention(query_size=hidden_size, key_size=context_size)
+        self.hid_attn = BahdanauAttention(query_size=hidden_size, key_size=hidden_size)
+        self.emb_attn = BahdanauAttention(query_size=hidden_size, key_size=input_size)
 
         self.attn_output = nn.Linear(hidden_size * 4, hidden_size)
 

@@ -1,8 +1,7 @@
 import argparse
 
-from src.main import train
-from src.accuracy import accuracy_translate
 from src.bin import auto_mkdir
+from src.main import train
 
 parser = argparse.ArgumentParser()
 
@@ -47,23 +46,9 @@ def run(**kwargs):
     args.config_path = r'/home/wangdq/code/python/nju_nlp/configs/dl4mt_nist_zh2en.yaml'
     args.use_gpu = True
     args.model_name = 'DL4MT_1GRU'
-    args.reload = True
+    args.pretrain_path = '/home/wangdq/save/model/dl4mt_1GRU/DL4MT_1GRU.best.final'
     train(args)
-
-    # args.batch_size = 512 / 4
-    # args.beam_size = 4
-    # args.model_path = r'/home/wangdq/njunlp_code/save/model/l2r/Transform.best.final'
-    # # args.data_name = 'valid_data'
-    # args.data_name = 'sample_data'
-    # args.is_n_gram = True
-    # accuracy_translate(args)
 
 
 if __name__ == '__main__':
     run()
-
-
-
-# CUDA_VISIBLE_DEVICES=2 nohup python -u /home/wangdq/njunlp_code/test/src/bin/train.py  >> /home/wangdq/njunlp_code/save/l2r.txt  2>&1 &CUDA_VISIBLE_DEVICES=2 nohup python -u /home/wangdq/njunlp_code/test/src/bin/train.py
-
-# CUDA_VISIBLE_DEVICES=2  python -u /home/wangdq/njunlp_code/test/src/bin/train.py

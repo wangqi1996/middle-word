@@ -1,8 +1,8 @@
 data_configs:
   lang_pair: "zh-en"
   train_data:
-    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/middle/train.zh.temp"
-    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/middle/train.en.temp"
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/train.zh"
+    - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/train/train.en"
   valid_data:
     - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/test/mt03.src"
     - "/home/user_data55/wangdq/data/nist_zh-en_1.34m/test/mt03.ref0" # 对ref0文件进行bi-directions 为了loss_validation

@@ -733,7 +733,7 @@ def train(FLAGS):
                     uidx, valid_loss, valid_bleu, lrate, bad_count
                 ))
 
-                if uidx > 109000:
+                if uidx > 59000:
                     WARN("uid Early Stop!")
                     exit(0)
 

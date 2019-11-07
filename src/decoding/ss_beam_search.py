@@ -159,6 +159,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
 
             # 填充成最大的长度
             if temp_sorted.shape[-1] < result.shape[-1]:
+                # PAD = 0
                 temp_sorted = torch.cat(
                     (temp_sorted, temp_sorted.new(result.shape[-1] - temp_sorted.shape[-1]).zero_().cuda()), dim=-1)
             if batch_result is None:

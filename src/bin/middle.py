@@ -46,15 +46,13 @@ def run(**kwargs):
     args.config_path = r'/home/wangdq/code/python/nju_nlp/configs/config_middle.yaml'
     args.use_gpu = True
     args.model_name = 'middle'
-    args.reload = True
-    # args.pretrain_path = '/home/wangdq/save/model/middle_2/middle.best.final'
+
+    # args.reload = True
+
+    args.pretrain_path = '/home/wangdq/save/model/middle_l2r/middle.best.final'
 
     train(args)
 
 
 if __name__ == '__main__':
     run()
-
-# CUDA_VISIBLE_DEVICES=0 nohup python -u /home/wangdq/njunlp_code/test/src/bin/r2l.py >> /home/wangdq/njunlp_code/save/r2l.txt  2>&1 &
-
-#  CUDA_VISIBLE_DEVICES=1 python -u /home/wangdq/njunlp_code/test/src/bin/r2l.py

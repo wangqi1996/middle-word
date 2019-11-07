@@ -47,6 +47,7 @@ def run(**kwargs):
     args.config_path = r'/home/wangdq/code/python/nju_nlp/configs/configs.yaml'
     args.use_gpu = True
     args.model_name = 'Transformer'
+    args.pretrain_path = '/home/wangdq/save/model/l2r/Transformer.best.final'
     train(args)
 
     # args.batch_size = 512 / 4

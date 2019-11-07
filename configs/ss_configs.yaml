@@ -53,7 +53,7 @@ training_configs:
   use_bucket: true  # Whether using bucket. Bucket try to put sentences with similar lengths into a batch
   batching_key: "tokens"  # The way to measure the size of a batch
   batch_size: 2048
-  buffer_size: 10000
+  buffer_size: 2048
   update_cycle: 4 # Update parameters every N batches.
   valid_batch_size: 20 # Batch size when evaluationg loss on dev set. Always measured as "samples"
   bleu_valid_batch_size: 5 # Batch size when evaluating BLEU on dev set. Always measures as "samples"
@@ -70,4 +70,4 @@ training_configs:
   save_freq: 1000 # Saving checkpoints every N steps
   loss_valid_freq: 1000 # Evaluate loss on dev set every N steps
   bleu_valid_freq: 1000 # Evaluate BLEU on dev set every N steps
-  early_stop_patience: 200000000 # Stop training if N subsequence BLEU evaluation on dev set does not increase
+  early_stop_patience: 30 # Stop training if N subsequence BLEU evaluation on dev set does not increase

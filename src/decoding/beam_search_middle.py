@@ -115,16 +115,16 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
                                              gather_shape=[-1])
 
         left_stop = tensor_gather_helper(gather_indices=next_beam_ids,
-                                             gather_from=left_stop,
-                                             batch_size=batch_size,
-                                             beam_size=beam_size,
-                                             gather_shape=[-1])
+                                         gather_from=left_stop,
+                                         batch_size=batch_size,
+                                         beam_size=beam_size,
+                                         gather_shape=[-1])
 
         right_stop = tensor_gather_helper(gather_indices=next_beam_ids,
-                                             gather_from=right_stop,
-                                             batch_size=batch_size,
-                                             beam_size=beam_size,
-                                             gather_shape=[-1])
+                                          gather_from=right_stop,
+                                          batch_size=batch_size,
+                                          beam_size=beam_size,
+                                          gather_shape=[-1])
 
         # If next_word_ids is EOS, beam_mask_ should be 0.0
         # 改掉： 如果连这两个是EOS，则表示左右两个decoder全部结束，此时返回 两个EOS可能是表示同一边停止
@@ -205,4 +205,4 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
         else:
             sorted_result = torch.cat((sorted_result, batch_result.unsqueeze(0)), dim=0)
 
-    return sorted_result
+    return sorted_result, result[:, 0, 0]

@@ -47,6 +47,7 @@ def run(**kwargs):
     args.use_gpu = True
     args.model_name = 'SS_Transformer'
     # args.reload = True
+    args.pretrain_path = '/home/wangdq/save/model/l2r/SS_Transformer.best.final'
     train(args)
 
 

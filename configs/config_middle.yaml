@@ -46,8 +46,8 @@ training_configs:
   shuffle: true # Whether to shuffle the whole data set after every epoch
   use_bucket: true  # Whether using bucket. Bucket try to put sentences with similar lengths into a batch
   batching_key: "tokens"  # The way to measure the size of a batch
-  batch_size: 2048
-  buffer_size: 2048
+  batch_size: 30
+  buffer_size: 30
   update_cycle: 3 # Update parameters every N batches.
   valid_batch_size: 20 # Batch size when evaluationg loss on dev set. Always measured as "samples"
   bleu_valid_batch_size: 5 # Batch size when evaluating BLEU on dev set. Always measures as "samples"
