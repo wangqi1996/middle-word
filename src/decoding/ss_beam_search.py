@@ -44,6 +44,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
     init_dec_states = nmt_model.init_decoder(enc_outputs, expand_size=beam_size)
 
     # Prepare for beam searching
+    # beam_mask=1代表没有预测到EOS, =0代表预测到EOS
     beam_mask = src_seqs.new(batch_size, beam_size).fill_(1).float()
     final_lengths = src_seqs.new(batch_size, beam_size).zero_().float()
     beam_scores = src_seqs.new(batch_size, beam_size).zero_().float()
@@ -113,6 +114,9 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
 
         # If next_word_ids is EOS, beam_mask_ should be 0.0
         beam_mask_ = 1.0 - next_word_ids.eq(EOS).float()
+
+        # beam_mask=1代表没有预测到EOS, =0代表预测到EOS
+        # beam_mask_=1代表没有预测到EOS， =0代表预测到EOS
         next_word_ids.masked_fill_((beam_mask_ + beam_mask).eq(0.0),
                                    PAD)  # If last step a EOS is already generated, we replace the last token as PAD
         beam_mask = beam_mask * beam_mask_
@@ -140,7 +144,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
                                   gather_shape=[batch_size * beam_size, -1])
 
     sorted_result = None
-    EOS_tensor = torch.tensor([EOS,]).cuda()
+    EOS_tensor = torch.tensor([EOS, ]).cuda()
     for i in range(batch_size):
         batch_result = None
         for j in range(beam_size):
@@ -150,7 +154,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
                     break
             _right = result[i][j][:k]
             kk = -1
-            for kk in range(k+1, len(result[i][j])):
+            for kk in range(k + 1, len(result[i][j])):
                 if result[i][j][kk] == EOS:
                     break
             _left = result[i][j][k + 1:kk]

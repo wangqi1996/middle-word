@@ -13,7 +13,7 @@
 # limitations under the License.
 from src.models.dl4mt import DL4MT
 from src.models.dl4mt_1GRU import DL4MT_1GRU
-from src.models.middle import Middle
+from src.models.middle_l2r import Middle
 from src.models.smart_start import SS_Transformer
 from src.models.transformer import Transformer
 

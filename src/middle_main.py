@@ -239,46 +239,43 @@ def bleu_validation(uidx,
             word_ids, first_words = beam_search(nmt_model=model, beam_size=beam_size, max_steps=max_steps, src_seqs=x,
                                                 alpha=alpha)
 
-        # word_ids = word_ids.cpu().numpy().tolist()
+        word_ids = word_ids.cpu().numpy().tolist()
 
         correct_first_words += first_words.eq(y[:, 1]).sum()
-        #
-        # # Append result
-        # for sent_t in word_ids:
-        #     sent_t = [[wid for wid in line if wid != PAD] for line in sent_t]
-        #     x_tokens = []
-        #
-        #     for wid in sent_t[0]:
-        #         if wid == EOS:
-        #             break
-        #         x_tokens.append(vocab_tgt.id2token(wid))
-        #
-        #     if len(x_tokens) > 0:
-        #         trans.append(vocab_tgt.tokenizer.detokenize(x_tokens))
-        #     else:
-        #         trans.append('%s' % vocab_tgt.id2token(EOS))
 
-    # origin_order = np.argsort(numbers).tolist()
-    # trans = [trans[ii] for ii in origin_order]
-    #
-    # infer_progress_bar.close()
-    #
-    # if not os.path.exists(valid_dir):
-    #     os.mkdir(valid_dir)
-    #
-    # hyp_path = os.path.join(valid_dir, 'trans.iter{0}.txt'.format(uidx))
-    #
-    # with open(hyp_path, 'w') as f:
-    #     for line in trans:
-    #         f.write('%s\n' % line)
-    #
-    # with open(hyp_path) as f:
-    #     bleu_v = bleu_scorer.corpus_bleu(f)
+        # Append result
+        for sent_t in word_ids:
+            sent_t = [[wid for wid in line if wid != PAD] for line in sent_t]
+            x_tokens = []
 
-    print('-----------------------------')
-    print(correct_first_words)
-    print(correct_first_words / 919.0)
-    # return bleu_v
+            for wid in sent_t[0]:
+                if wid == EOS:
+                    break
+                x_tokens.append(vocab_tgt.id2token(wid))
+
+            if len(x_tokens) > 0:
+                trans.append(vocab_tgt.tokenizer.detokenize(x_tokens))
+            else:
+                trans.append('%s' % vocab_tgt.id2token(EOS))
+
+    origin_order = np.argsort(numbers).tolist()
+    trans = [trans[ii] for ii in origin_order]
+
+    infer_progress_bar.close()
+
+    if not os.path.exists(valid_dir):
+        os.mkdir(valid_dir)
+
+    hyp_path = os.path.join(valid_dir, 'trans.iter{0}.txt'.format(uidx))
+
+    with open(hyp_path, 'w') as f:
+        for line in trans:
+            f.write('%s\n' % line)
+
+    with open(hyp_path) as f:
+        bleu_v = bleu_scorer.corpus_bleu(f)
+
+    return bleu_v, correct_first_words, correct_first_words / 919.0
 
 
 def load_pretrained_model(nmt_model, pretrain_path, device, exclude_prefix=None):
@@ -642,26 +639,28 @@ def train(FLAGS):
             # ================================================================================== #
             # BLEU Validation & Early Stop
 
-            if True or should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
-                                               every_n_step=training_configs['bleu_valid_freq'],
-                                               min_step=training_configs['bleu_valid_warmup'],
-                                               debug=FLAGS.debug):
+            if should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
+                                       every_n_step=training_configs['bleu_valid_freq'],
+                                       min_step=training_configs['bleu_valid_warmup'],
+                                       debug=FLAGS.debug):
 
                 if ma is not None:
                     origin_state_dict = deepcopy(nmt_model.state_dict())
                     nmt_model.load_state_dict(ma.export_ma_params(), strict=False)
 
-                valid_bleu = bleu_validation(uidx=uidx,
-                                             valid_iterator=valid_iterator,
-                                             batch_size=training_configs["bleu_valid_batch_size"],
-                                             model=nmt_model,
-                                             bleu_scorer=bleu_scorer,
-                                             vocab_tgt=vocab_tgt,
-                                             valid_dir=FLAGS.valid_path,
-                                             max_steps=training_configs["bleu_valid_configs"]["max_steps"],
-                                             beam_size=training_configs["bleu_valid_configs"]["beam_size"],
-                                             alpha=training_configs["bleu_valid_configs"]["alpha"]
-                                             )
+                valid_bleu, c_word, c_word_rate = bleu_validation(uidx=uidx,
+                                                                  valid_iterator=valid_iterator,
+                                                                  batch_size=training_configs["bleu_valid_batch_size"],
+                                                                  model=nmt_model,
+                                                                  bleu_scorer=bleu_scorer,
+                                                                  vocab_tgt=vocab_tgt,
+                                                                  valid_dir=FLAGS.valid_path,
+                                                                  max_steps=training_configs["bleu_valid_configs"][
+                                                                      "max_steps"],
+                                                                  beam_size=training_configs["bleu_valid_configs"][
+                                                                      "beam_size"],
+                                                                  alpha=training_configs["bleu_valid_configs"]["alpha"]
+                                                                  )
 
                 model_collections.add_to_collection(key="history_bleus", value=valid_bleu)
 
@@ -695,9 +694,10 @@ def train(FLAGS):
                     nmt_model.load_state_dict(origin_state_dict)
                     del origin_state_dict
 
-                INFO("{0} Loss: {1:.2f} BLEU: {2:.2f} lrate: {3:6f} patience: {4}".format(
-                    uidx, valid_loss, valid_bleu, lrate, bad_count
-                ))
+                INFO(
+                    "{0} Loss: {1:.2f} BLEU: {2:.2f} lrate: {3:6f} patience: {4} correct_word: {5}, correct_word_rate: {6}".format(
+                        uidx, valid_loss, valid_bleu, lrate, bad_count, c_word, c_word_rate
+                    ))
 
         training_progress_bar.close()
 

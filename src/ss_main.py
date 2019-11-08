@@ -105,7 +105,8 @@ def process_data(seqs_x, seqs_y):
     result_seqs_x = []
     result_seqs_y = []
     for x, y in zip(seqs_x, seqs_y):
-        index = len(y) // 2
+        # index = len(y) // 2
+        index = 0
         temp_y = []
         if y[index:]:
             temp_y = y[index:]
@@ -677,9 +678,9 @@ def train(FLAGS):
             # BLEU Validation & Early Stop
 
             if should_trigger_by_steps(global_step=uidx, n_epoch=eidx,
-                                       every_n_step=training_configs['bleu_valid_freq'],
-                                       min_step=training_configs['bleu_valid_warmup'],
-                                       debug=FLAGS.debug):
+                                               every_n_step=training_configs['bleu_valid_freq'],
+                                               min_step=training_configs['bleu_valid_warmup'],
+                                               debug=FLAGS.debug):
 
                 if ma is not None:
                     origin_state_dict = deepcopy(nmt_model.state_dict())
@@ -736,6 +737,8 @@ def train(FLAGS):
                 if uidx > 59000:
                     WARN("uid Early Stop!")
                     exit(0)
+
+                exit(0)
 
         training_progress_bar.close()
 

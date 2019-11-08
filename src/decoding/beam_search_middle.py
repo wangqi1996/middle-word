@@ -49,6 +49,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
     _beam_mask = src_seqs.new(batch_size, beam_size).fill_(1).float()
     final_lengths = src_seqs.new(batch_size, beam_size).zero_().float()
     beam_scores = src_seqs.new(batch_size, beam_size).zero_().float()
+    # TODO
     left_stop = src_seqs.new(batch_size, beam_size).fill_(0).byte()
     right_stop = src_seqs.new(batch_size, beam_size).fill_(0).byte()
 
@@ -174,6 +175,7 @@ def beam_search(nmt_model, beam_size, max_steps, src_seqs, alpha=-1.0):
             temp_sorted = result[i][j][0].unsqueeze(0)  # [seq_len]
             # 先向左翻译的
             right_next = True
+            # TODO
             left_stop = False
             right_stop = False
             for k in range(1, len(result[i][j])):

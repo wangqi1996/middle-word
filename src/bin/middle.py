@@ -49,7 +49,7 @@ def run(**kwargs):
 
     # args.reload = True
 
-    args.pretrain_path = '/home/wangdq/save/model/middle_l2r/middle.best.final'
+    # args.pretrain_path = '/home/wangdq/save/model/middle_l2r/middle.best.final'
 
     train(args)
 
